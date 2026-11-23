@@ -113,12 +113,11 @@ kabul edilebildiği yerlerde kullanın.
 | `ghcr.io/mehmetalidumlu/geoserver-proxy-api-vpn` | VPN tünelleri için Docker CLI'lı API |
 | `ghcr.io/mehmetalidumlu/geoserver-proxy-vpn-tunnel` | API'nin başlattığı tünel imajı |
 
-Her sürüm kendi numarasıyla ve `latest` olarak etiketlenir. Her imaj taranır (Trivy) ve SBOM'u vardır;
-[Releases](https://github.com/mehmetalidumlu/GeoserverProxyManagementHub/releases) sayfasında güvenlik raporu, SBOM'lar
-ve internet erişimi olmayan sunucular için çevrimdışı paket bulunur. İmajlar ve sağlama toplamları cosign ile imzalıdır:
+Her sürüm kendi numarasıyla ve `latest` olarak etiketlenir (güncel sürüm: **1.0.0**, linux/amd64). Paketler bu
+deponun **Packages** bölümünde listelenir ve giriş yapmadan indirilebilir:
 
 ```bash
-cosign verify --key cosign.pub ghcr.io/mehmetalidumlu/geoserver-proxy-api:<sürüm>
+docker pull ghcr.io/mehmetalidumlu/geoserver-proxy-api:1.0.0
 ```
 
 ## Geri bildirim
@@ -127,7 +126,7 @@ Uygulamadaki hesap menüsünden **Geri bildirim**'i kullanın ya da bu depoda bi
 
 ## Üçüncü taraf yazılımlar
 
-İmajlar açık kaynak bileşenler içerir; her sürümün SBOM'larında imaj bazında listelenir. VPN tünel imajı
+İmajlar açık kaynak bileşenler içerir (.NET, nginx, Alpine Linux paketleri ve diğerleri). VPN tünel imajı
 [snx-rs](https://github.com/ancwrd1/snx-rs) (AGPL-3.0) yazılımını değiştirilmeden, yayımlanmış kaynağından derlenmiş
 olarak içerir; diğer VPN istemcileri Alpine Linux paketlerinden gelir.
 

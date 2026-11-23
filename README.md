@@ -113,12 +113,11 @@ use it only where that is acceptable.
 | `ghcr.io/mehmetalidumlu/geoserver-proxy-api-vpn` | API with the Docker CLI, for VPN tunnels |
 | `ghcr.io/mehmetalidumlu/geoserver-proxy-vpn-tunnel` | Tunnel image started by the API |
 
-Each release is tagged with its version and `latest`. Every image is scanned (Trivy) and has an SBOM; the
-[Releases](https://github.com/mehmetalidumlu/GeoserverProxyManagementHub/releases) page carries the security report,
-the SBOMs and an offline bundle for servers without internet access. Images and checksums are signed with cosign:
+Each release is tagged with its version and `latest` (current release: **1.0.0**, linux/amd64). The packages are
+listed under **Packages** on this repository and can be pulled without signing in:
 
 ```bash
-cosign verify --key cosign.pub ghcr.io/mehmetalidumlu/geoserver-proxy-api:<version>
+docker pull ghcr.io/mehmetalidumlu/geoserver-proxy-api:1.0.0
 ```
 
 ## Feedback
@@ -127,7 +126,7 @@ Use **Feedback** in the account menu of the application, or open an issue in thi
 
 ## Third-party software
 
-The images contain open-source components, listed per image in the SBOMs of each release. The VPN tunnel image
+The images contain open-source components (.NET, nginx, Alpine Linux packages and others). The VPN tunnel image
 includes [snx-rs](https://github.com/ancwrd1/snx-rs) (AGPL-3.0) unmodified, built from its published source; the
 other VPN clients come from Alpine Linux packages.
 
