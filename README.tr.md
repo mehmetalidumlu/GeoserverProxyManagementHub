@@ -32,7 +32,7 @@ GSPMH, GeoServer kataloğu üzerinde REST API ile çalışır. Ham mekânsal ver
 
 ## Tanıtım sürümü
 
-Herkese açık tanıtım sürümü: **[tanıtım sitesi bağlantısı]**. Google hesabınızla girin, kendi GeoServer'ınızı ekleyin
+Herkese açık tanıtım sürümü: **[https://gspmh.wpsstudio.com](https://gspmh.wpsstudio.com)**. Google hesabınızla girin, kendi GeoServer'ınızı ekleyin
 ya da örnek sunucuyla deneyin. Ziyaretçiler operatör olarak girer ve menülerin bir kısmını görür; kurumlara yönelik
 özellikler (yönetim, VPN, LDAP, zamanlanmış işler, izleme…) bu sürümde kapalıdır. Eklenen veriler her gece
 00:00 UTC'de silinir: gerçek üretim şifrelerinizi girmeyin.

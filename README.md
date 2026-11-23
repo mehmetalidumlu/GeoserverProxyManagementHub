@@ -32,7 +32,7 @@ GSPMH works on the GeoServer catalog through its REST API. It does not copy raw 
 
 ## Try the showcase
 
-A public showcase runs at **[showcase link]**. Sign in with a Google account, add your own GeoServer or use the
+A public showcase runs at **[https://gspmh.wpsstudio.com](https://gspmh.wpsstudio.com)**. Sign in with a Google account, add your own GeoServer or use the
 sample server. Visitors sign in as operators and see part of the menus; features meant for organisations
 (administration, VPN, LDAP, scheduled jobs, monitoring…) are closed there. Data added in the showcase is deleted
 every night at 00:00 UTC: do not enter real production passwords.
