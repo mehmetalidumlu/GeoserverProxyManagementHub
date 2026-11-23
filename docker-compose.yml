@@ -1,0 +1,103 @@
+# GeoServer Proxy & Management Hub (GSPMH)
+#
+#   1. Copy .env.example to .env and fill it in (install.sh / install.ps1 do it for you).
+#   2. docker compose up -d
+#   3. Open http://<this server> and finish the setup wizard ("Prepared database").
+#
+# Images: ghcr.io/mehmetalidumlu/geoserver-proxy-*. GSPMH_VERSION picks the release (latest by default).
+# Only the web front end is published on a host port; the API and PostgreSQL stay on the internal network.
+
+name: gspmh
+
+networks:
+  gspmh-net:
+    driver: bridge
+
+services:
+  gspmh-postgres:
+    image: postgres:18.7-alpine
+    container_name: gspmh-postgres
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-gspmh}
+      POSTGRES_USER: ${POSTGRES_USER:-gspmh_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?Set POSTGRES_PASSWORD in .env}
+    volumes:
+      - gspmh-postgres-data:/var/lib/postgresql
+    networks:
+      - gspmh-net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-gspmh_user} -d ${POSTGRES_DB:-gspmh}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 10s
+    restart: unless-stopped
+
+  gspmh-api:
+    image: ghcr.io/mehmetalidumlu/geoserver-proxy-api:${GSPMH_VERSION:-latest}
+    container_name: gspmh-api
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ASPNETCORE_URLS=http://+:8080
+      - ConnectionStrings__DefaultConnection=Host=gspmh-postgres;Port=5432;Database=${POSTGRES_DB:-gspmh};Username=${POSTGRES_USER:-gspmh_user};Password=${POSTGRES_PASSWORD}
+      - JwtSettings__SecretKey=${JWT_SECRET_KEY:?Set JWT_SECRET_KEY in .env}
+      - JwtSettings__Issuer=gspmh-api
+      - JwtSettings__Audience=gspmh-app
+      - JwtSettings__ExpiresInMinutes=${JWT_EXPIRES_MINUTES:-480}
+      - Encryption__Key=${ENCRYPTION_KEY:?Set ENCRYPTION_KEY in .env}
+      - Cors__AllowedOrigins__0=${PUBLIC_URL:-http://localhost}
+      - Backup__StoragePath=/app/backups/geoserver
+      - Backup__RetentionDays=${BACKUP_RETENTION_DAYS:-30}
+      - Backup__MaxPackagesToKeep=${BACKUP_MAX_PACKAGES:-50}
+      - ApplicationDatabaseBackup__StoragePath=/app/backups/application-database
+      - Authentication__MaxFailedLoginAttempts=${AUTH_MAX_FAILED_LOGIN_ATTEMPTS:-5}
+      - Authentication__LockoutMinutes=${AUTH_LOCKOUT_MINUTES:-15}
+      # Honour X-Forwarded-For only from the bundled nginx (private container networks).
+      - ReverseProxy__TrustedNetworks__0=172.16.0.0/12
+      - ReverseProxy__TrustedNetworks__1=192.168.0.0/16
+      - ReverseProxy__TrustedNetworks__2=10.0.0.0/8
+      - LocalGeoServer__Enabled=false
+      - Feedback__InstallationName=${INSTALLATION_NAME:-}
+    volumes:
+      - gspmh-backup-data:/app/backups
+      - gspmh-setup-data:/app/App_Data
+    networks:
+      - gspmh-net
+    depends_on:
+      gspmh-postgres:
+        condition: service_healthy
+    # Lets the API reach a GeoServer on this computer as host.docker.internal.
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://localhost:8080/health/ready > /dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 30s
+    restart: unless-stopped
+
+  gspmh-web:
+    image: ghcr.io/mehmetalidumlu/geoserver-proxy-web:${GSPMH_VERSION:-latest}
+    container_name: gspmh-web
+    ports:
+      - "${WEB_PORT:-80}:8080"
+    networks:
+      - gspmh-net
+    depends_on:
+      - gspmh-api
+    healthcheck:
+      test: ["CMD-SHELL", "wget -qO- http://127.0.0.1:8080/health > /dev/null 2>&1 || exit 1"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 10s
+    restart: unless-stopped
+
+volumes:
+  gspmh-postgres-data:
+    name: gspmh-postgres-data
+  gspmh-backup-data:
+    name: gspmh-backup-data
+  gspmh-setup-data:
+    name: gspmh-setup-data

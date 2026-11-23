@@ -1,0 +1,23 @@
+# VPN tunnels to customer networks (Administration › VPN tunnels). Optional.
+#
+#   docker compose -f docker-compose.yml -f docker-compose.vpn.yml up -d
+#
+# The API starts one small tunnel container per VPN connection through the Docker socket; the VPN runs only inside
+# that container, never on the host. Access to the Docker socket is access to the Docker host: use this only where
+# that is acceptable. DOCKER_GID is the group of /var/run/docker.sock on the host (stat -c %g /var/run/docker.sock).
+services:
+  gspmh-api:
+    image: ghcr.io/mehmetalidumlu/geoserver-proxy-api-vpn:${GSPMH_VERSION:-latest}
+    group_add:
+      - "${DOCKER_GID:-999}"
+    environment:
+      - Vpn__Image=ghcr.io/mehmetalidumlu/geoserver-proxy-vpn-tunnel:${GSPMH_VERSION:-latest}
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+
+  # Pulls the tunnel image only; it exits at once (the API starts the real tunnel containers).
+  gspmh-vpn-tunnel:
+    image: ghcr.io/mehmetalidumlu/geoserver-proxy-vpn-tunnel:${GSPMH_VERSION:-latest}
+    entrypoint: ["true"]
+    restart: "no"
+    network_mode: none
